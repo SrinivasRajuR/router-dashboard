@@ -231,51 +231,64 @@
 <script>
 
 const API =
-"https://script.google.com/macros/s/AKfycbwWXwrwkQWWaPDdCNrb-bEDVwOAT36veI4FkOCCoiMMbRtPfr_lusKvqGRv717qN7JqPw/exec?type=dashboard";
+"https://script.google.com/macros/s/XXXXX/exec?type=dashboard";
+
+let chart7 = null;
+let chart30 = null;
 
 async function loadData() {
 
-  const response =
-    await fetch(API);
+  try {
 
-  const data =
-    await response.json();
+    const response =
+      await fetch(API);
 
-  document.getElementById(
-    "uptime"
-  ).innerText =
-    data.todayUptime + "%";
+    const data =
+      await response.json();
 
-  document.getElementById(
-    "downtime"
-  ).innerText =
-    data.todayDowntime;
+    // =====================
+    // CARDS
+    // =====================
 
-  document.getElementById(
-    "restarts"
-  ).innerText =
-    data.todayRestarts;
-
-  document.getElementById(
-    "boot"
-  ).innerText =
-    data.lastBoot;
-
-  document.getElementById(
-    "heap"
-  ).innerText =
-    data.heap;
-
-  const logs =
     document.getElementById(
-      "logs"
-    );
+      "uptime"
+    ).innerText =
+      data.todayUptime + "%";
 
-  logs.innerHTML = "";
+    document.getElementById(
+      "downtime"
+    ).innerText =
+      data.todayDowntime;
 
-  data.logs.forEach(log => {
+    document.getElementById(
+      "restarts"
+    ).innerText =
+      data.todayRestarts;
 
-    logs.innerHTML += `
+    document.getElementById(
+      "boot"
+    ).innerText =
+      data.lastBoot;
+
+    document.getElementById(
+      "heap"
+    ).innerText =
+      data.heap;
+
+    // =====================
+    // LOGS
+    // =====================
+
+    const logs =
+      document.getElementById(
+        "logs"
+      );
+
+    logs.innerHTML = "";
+
+    data.logs.forEach(log => {
+
+      logs.innerHTML += `
 
       <tr>
 
@@ -284,60 +297,111 @@ async function loadData() {
         <td>${log.event}</td>
         <td>${log.downtime}</td>
         <td>${log.restarts}</td>
-        <td>${log.uptime}</td>
+        <td>${log.uptime}%</td>
 
       </tr>
+      `;
+    });
 
-    `;
-  });
+    // =====================
+    // CHARTS
+    // =====================
 
-  createChart(
-    "chart7",
-    data.last7days
-  );
-
-  createChart(
-    "chart30",
-    data.last30days
-  );
-}
-
-function createChart(id,data) {
-
-  new Chart(
-    document.getElementById(id),
-
-    {
-
-      type: "line",
-
-      data: {
-
-        labels:
-          data.map(x=>x.date),
-
-        datasets: [
-
-          {
-
-            label:
-              "Uptime %",
-
-            data:
-              data.map(x=>x.uptime),
-
-            tension: 0.3
-
-          }
-
-        ]
+    updateChart(
+      "chart7",
+      data.last7days,
+      chart7,
+      function(c){
+        chart7 = c;
       }
-    }
-  );
+    );
+
+    updateChart(
+      "chart30",
+      data.last30days,
+      chart30,
+      function(c){
+        chart30 = c;
+      }
+    );
+
+  }
+
+  catch(err) {
+
+    console.log(err);
+  }
 }
 
+function updateChart(
+  id,
+  data,
+  chartRef,
+  setChart
+) {
+
+  if (chartRef) {
+
+    chartRef.destroy();
+  }
+
+  const newChart =
+    new Chart(
+
+      document.getElementById(id),
+
+      {
+
+        type: "line",
+
+        data: {
+
+          labels:
+            data.map(
+              x => x.date
+            ),
+
+          datasets: [
+
+            {
+
+              label:
+                "Uptime %",
+
+              data:
+                data.map(
+                  x => x.uptime
+                ),
+
+              tension: 0.3
+            }
+          ]
+        },
+
+        options: {
+
+          responsive: true,
+
+          scales: {
+
+            y: {
+
+              min: 0,
+
+              max: 100
+            }
+          }
+        }
+      }
+    );
+
+  setChart(newChart);
+}
+
+// Initial load
 loadData();
 
+// Refresh every second
 setInterval(
   loadData,
   1000
