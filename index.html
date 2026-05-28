@@ -172,22 +172,6 @@ Refreshing...
 
 </div>
 
-  <div class="card" id="offlineCard" style="display:none;">
-
-  <div class="title">
-    Offline Duration
-  </div>
-
-  <div
-    class="value offline"
-    id="offlineTimer"
-    style="font-size:22px;"
-  >
-    --
-  </div>
-
-</div>
-
 <div
   class="card"
   id="lastOnlineCard"
@@ -207,22 +191,21 @@ Refreshing...
   </div>
 
 </div>
-  
   <div class="card">
 
-  <div class="title">
-    Today's Uptime
+    <div class="title">
+      Today's Uptime
+    </div>
+
+    <div
+      class="value"
+      id="uptime"
+    >
+      --
+    </div>
+
   </div>
 
-  <div
-    class="value"
-    id="uptime"
-  >
-    --
-  </div>
-
-</div>
-  
   <div class="card">
 
     <div class="title">
@@ -361,86 +344,59 @@ async function loadDashboard() {
     // HEARTBEAT STATUS
     // ==================================
 
-const status =
-  document.getElementById(
-    "status"
-  );
+    const status =
+      document.getElementById(
+        "status"
+      );
 
-const offlineCard =
-  document.getElementById(
-    "offlineCard"
-  );
+    if (data.online) {
 
-const offlineTimer =
+      status.innerHTML =
+        "ONLINE";
+
+      status.className =
+        "value online";
+    }
+
+    else {
+
+      status.innerHTML =
+        "OFFLINE";
+
+      status.className =
+        "value offline";
+    }
+
+    const lastOnlineCard =
   document.getElementById(
-    "offlineTimer"
+    "lastOnlineCard"
   );
 
 if (data.online) {
 
-  status.innerHTML =
-    "ONLINE";
-
-  status.className =
-    "value online";
-
-  offlineCard.style.display =
+  lastOnlineCard.style.display =
     "none";
 }
 
 else {
 
-  status.innerHTML =
-    "OFFLINE";
-
-  status.className =
-    "value offline";
-
-  offlineCard.style.display =
+  lastOnlineCard.style.display =
     "block";
 
-  offlineTimer.innerHTML =
-    "Offline for " +
-    data.liveOfflineTime;
+  document.getElementById(
+    "lastOnline"
+  ).innerHTML =
+
+    data.lastOnline;
 }
     // ==================================
     // CARDS
     // ==================================
 
-    const uptimeEl =
-  document.getElementById(
-    "uptime"
-  );
-
-const uptimeValue =
-  parseFloat(
-    data.todayUptime
-  );
-
-uptimeEl.innerHTML =
-  uptimeValue.toFixed(2) + "%";
-
-// ===================================
-// SLA COLORS
-// ===================================
-
-if (uptimeValue >= 99.9) {
-
-  uptimeEl.style.color =
-    "#00ff88";
-}
-
-else if (uptimeValue >= 95) {
-
-  uptimeEl.style.color =
-    "#ffd54f";
-}
-
-else {
-
-  uptimeEl.style.color =
-    "#ff4444";
-}
+    document.getElementById(
+      "uptime"
+    ).innerHTML =
+      data.todayUptime + "%";
 
     document.getElementById(
       "downtime"
@@ -688,7 +644,6 @@ setInterval(
   1000
 );
 
-  
 </script>
 
 </body>
