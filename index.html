@@ -159,18 +159,26 @@ Refreshing...
 
   <div class="card">
 
-    <div class="title">
-      ESP Status
-    </div>
-
-    <div
-      class="value"
-      id="status"
-    >
-      --
-    </div>
-
+  <div class="title">
+    ESP Status
   </div>
+
+  <div
+    class="value"
+    id="status"
+  >
+    --
+  </div>
+
+  <div
+    class="small"
+    id="lastOnline"
+    style="margin-top:10px;"
+  >
+    --
+  </div>
+
+</div>
 
   <div class="card">
 
@@ -346,6 +354,24 @@ async function loadDashboard() {
 
       status.className =
         "value offline";
+    }
+
+    if (!data.online) {
+
+    document.getElementById(
+    "lastOnline"
+    ).innerHTML =
+
+    "Last Online:<br>" +
+
+    data.lastOnline;
+    }
+
+    else {
+
+    document.getElementById(
+    "lastOnline"
+    ).innerHTML = "";
     }
 
     // ==================================
