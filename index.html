@@ -5,14 +5,7 @@
 
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>
-    ESP Router Dashboard
-  </title>
+  <title>My Router Dashboard</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -20,30 +13,26 @@
 
     body {
 
-      margin: 0;
-
-      padding: 20px;
+      font-family: Arial;
 
       background: #111;
 
       color: white;
 
-      font-family: Arial;
+      padding: 20px;
     }
 
     h1 {
 
-      text-align: center;
-
       margin-bottom: 20px;
     }
 
-    .cards {
+    .grid {
 
       display: grid;
 
       grid-template-columns:
-      repeat(auto-fit,minmax(220px,1fr));
+      repeat(auto-fit, minmax(240px,1fr));
 
       gap: 15px;
 
@@ -54,9 +43,9 @@
 
       background: #1e1e1e;
 
-      border-radius: 12px;
-
       padding: 20px;
+
+      border-radius: 12px;
 
       box-shadow:
       0 0 10px rgba(0,0,0,0.4);
@@ -67,36 +56,25 @@
       font-size: 14px;
 
       color: #aaa;
-
-      margin-bottom: 10px;
     }
 
     .value {
 
       font-size: 28px;
 
+      margin-top: 10px;
+
       font-weight: bold;
     }
 
     .online {
 
-      color: #00ff66;
+      color: #00ff88;
     }
 
     .offline {
 
-      color: red;
-    }
-
-    .chart-box {
-
-      background: #1e1e1e;
-
-      padding: 20px;
-
-      border-radius: 12px;
-
-      margin-bottom: 20px;
+      color: #ff4444;
     }
 
     table {
@@ -105,19 +83,15 @@
 
       border-collapse: collapse;
 
-      background: #1e1e1e;
-
-      border-radius: 12px;
-
-      overflow: hidden;
+      margin-top: 20px;
     }
 
     th, td {
 
-      padding: 12px;
-
       border-bottom:
       1px solid #333;
+
+      padding: 10px;
 
       text-align: left;
     }
@@ -127,9 +101,22 @@
       background: #222;
     }
 
-    tr:hover {
+    canvas {
 
-      background: #2a2a2a;
+      background: white;
+
+      border-radius: 10px;
+
+      padding: 10px;
+
+      margin-top: 20px;
+    }
+
+    .small {
+
+      font-size: 13px;
+
+      color: #aaa;
     }
 
   </style>
@@ -138,425 +125,437 @@
 
 <body>
 
-  <h1>
-    ESP-01 Router Dashboard
-  </h1>
+<h1>ESP Router Dashboard</h1>
 
-  <!-- ===================== -->
-  <!-- CARDS -->
-  <!-- ===================== -->
+<div class="small" id="refreshTime">
+Refreshing...
+</div>
 
-  <div class="cards">
+<div class="grid">
 
-    <div class="card">
+  <div class="card">
 
-      <div class="title">
-        Router Status
-      </div>
-
-      <div
-        class="value"
-        id="status"
-      >
-        --
-      </div>
-
+    <div class="title">
+      ESP Status
     </div>
 
-    <div class="card">
-
-      <div class="title">
-        Today's Uptime
-      </div>
-
-      <div
-        class="value"
-        id="uptime"
-      >
-        --
-      </div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="title">
-        Today's Total Downtime
-      </div>
-
-      <div
-        class="value"
-        id="downtime"
-      >
-        --
-      </div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="title">
-        Today's Total Restarts
-      </div>
-
-      <div
-        class="value"
-        id="restarts"
-      >
-        --
-      </div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="title">
-        Last Boot
-      </div>
-
-      <div
-        class="value"
-        id="boot"
-        style="font-size:18px"
-      >
-        --
-      </div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="title">
-        Heap Memory
-      </div>
-
-      <div
-        class="value"
-        id="heap"
-      >
-        --
-      </div>
-
+    <div
+      class="value"
+      id="status"
+    >
+      --
     </div>
 
   </div>
 
-  <!-- ===================== -->
-  <!-- LAST 7 DAYS -->
-  <!-- ===================== -->
+  <div class="card">
 
-  <div class="chart-box">
+    <div class="title">
+      Today's Uptime
+    </div>
 
-    <h2>
-      Last 7 Days Uptime
-    </h2>
-
-    <canvas id="chart7"></canvas>
-
-  </div>
-
-  <!-- ===================== -->
-  <!-- LAST 30 DAYS -->
-  <!-- ===================== -->
-
-  <div class="chart-box">
-
-    <h2>
-      Last 30 Days Uptime
-    </h2>
-
-    <canvas id="chart30"></canvas>
+    <div
+      class="value"
+      id="uptime"
+    >
+      --
+    </div>
 
   </div>
 
-  <!-- ===================== -->
-  <!-- LOG TABLE -->
-  <!-- ===================== -->
+  <div class="card">
 
-  <div class="chart-box">
+    <div class="title">
+      Today's Total Downtime
+    </div>
 
-    <h2>
-      Outage Logs
-    </h2>
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>Date</th>
-
-          <th>Time</th>
-
-          <th>Event</th>
-
-          <th>Downtime</th>
-
-          <th>Restarts</th>
-
-          <th>Uptime</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody id="logs">
-
-      </tbody>
-
-    </table>
+    <div
+      class="value"
+      id="downtime"
+    >
+      --
+    </div>
 
   </div>
 
-  <!-- ===================== -->
-  <!-- SCRIPT -->
-  <!-- ===================== -->
+  <div class="card">
 
-  <script>
+    <div class="title">
+      Today's Total Restarts
+    </div>
 
-    // =================================
-    // APPS SCRIPT API URL
-    // =================================
+    <div
+      class="value"
+      id="restarts"
+    >
+      --
+    </div>
 
-    const API =
-    "https://script.google.com/macros/s/AKfycbwWXwrwkQWWaPDdCNrb-bEDVwOAT36veI4FkOCCoiMMbRtPfr_lusKvqGRv717qN7JqPw/exec?type=dashboard";
+  </div>
 
-    let chart7 = null;
+  <div class="card">
 
-    let chart30 = null;
+    <div class="title">
+      Last Boot
+    </div>
 
-    // =================================
-    // LOAD DASHBOARD
-    // =================================
+    <div
+      class="value"
+      id="lastBoot"
+      style="font-size:18px;"
+    >
+      --
+    </div>
 
-    async function loadData() {
+  </div>
 
-      try {
+  <div class="card">
 
-        const response =
-          await fetch(API);
+    <div class="title">
+      Free Heap
+    </div>
 
-        const data =
-          await response.json();
+    <div
+      class="value"
+      id="heap"
+    >
+      --
+    </div>
 
-        // =========================
-        // STATUS
-        // =========================
+  </div>
 
-        const status =
-          document.getElementById(
-            "status"
-          );
+</div>
 
-        status.innerText =
 
-          data.online
-          ? "ONLINE"
-          : "OFFLINE";
 
-        status.className =
+<h2>Last 7 Days Uptime</h2>
 
-          data.online
-          ? "value online"
-          : "value offline";
+<canvas id="chart7"></canvas>
 
-        // =========================
-        // CARDS
-        // =========================
 
-        document.getElementById(
-          "uptime"
-        ).innerText =
-          data.todayUptime + "%";
 
-        document.getElementById(
-          "downtime"
-        ).innerText =
-          data.todayDowntime;
+<h2>Last 30 Days Uptime</h2>
 
-        document.getElementById(
-          "restarts"
-        ).innerText =
-          data.todayRestarts;
+<canvas id="chart30"></canvas>
 
-        document.getElementById(
-          "boot"
-        ).innerText =
-          data.lastBoot;
 
-        document.getElementById(
-          "heap"
-        ).innerText =
-          data.heap;
 
-        // =========================
-        // LOGS
-        // =========================
+<h2>Outage Logs</h2>
 
-        const logs =
-          document.getElementById(
-            "logs"
-          );
+<table>
 
-        logs.innerHTML = "";
+<thead>
 
-        data.logs.forEach(log => {
+<tr>
 
-          logs.innerHTML += `
+<th>Date</th>
 
-          <tr>
+<th>Time</th>
 
-            <td>${log.date}</td>
+<th>Event</th>
 
-            <td>${log.time}</td>
+<th>Downtime</th>
 
-            <td>${log.event}</td>
+<th>Restarts</th>
 
-            <td>${log.downtime}</td>
+<th>Uptime %</th>
 
-            <td>${log.restarts}</td>
+</tr>
 
-            <td>${log.uptime}%</td>
+</thead>
 
-          </tr>
-          `;
-        });
+<tbody id="logs">
 
-        // =========================
-        // CHARTS
-        // =========================
+</tbody>
 
-        updateChart(
+</table>
 
-          "chart7",
 
-          data.last7days,
 
-          chart7,
+<script>
 
-          function(c) {
+const API_URL =
+"https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?type=dashboard";
 
-            chart7 = c;
-          }
-        );
+let chart7;
 
-        updateChart(
+let chart30;
 
-          "chart30",
 
-          data.last30days,
 
-          chart30,
+// ======================================
+// FETCH DASHBOARD DATA
+// ======================================
 
-          function(c) {
+async function loadDashboard() {
 
-            chart30 = c;
-          }
-        );
-      }
+  try {
 
-      catch(err) {
+    const res =
+      await fetch(API_URL);
 
-        console.log(err);
-      }
+    const data =
+      await res.json();
+
+    // ==================================
+    // HEARTBEAT STATUS
+    // ==================================
+
+    const status =
+      document.getElementById(
+        "status"
+      );
+
+    if (data.online) {
+
+      status.innerHTML =
+        "ONLINE";
+
+      status.className =
+        "value online";
     }
 
-    // =================================
-    // UPDATE CHART
-    // =================================
+    else {
 
-    function updateChart(
+      status.innerHTML =
+        "OFFLINE";
 
-      id,
-
-      data,
-
-      chartRef,
-
-      setChart
-    ) {
-
-      if (chartRef) {
-
-        chartRef.destroy();
-      }
-
-      const newChart =
-
-        new Chart(
-
-          document.getElementById(id),
-
-          {
-
-            type: "line",
-
-            data: {
-
-              labels:
-
-                data.map(
-                  x => x.date
-                ),
-
-              datasets: [
-
-                {
-
-                  label:
-                    "Uptime %",
-
-                  data:
-
-                    data.map(
-                      x => x.uptime
-                    ),
-
-                  tension: 0.3
-                }
-              ]
-            },
-
-            options: {
-
-              responsive: true,
-
-              scales: {
-
-                y: {
-
-                  min: 0,
-
-                  max: 100
-                }
-              }
-            }
-          }
-        );
-
-      setChart(newChart);
+      status.className =
+        "value offline";
     }
 
-    // =================================
-    // INITIAL LOAD
-    // =================================
+    // ==================================
+    // CARDS
+    // ==================================
 
-    loadData();
+    document.getElementById(
+      "uptime"
+    ).innerHTML =
+      data.todayUptime + "%";
 
-    // =================================
-    // AUTO REFRESH EVERY SECOND
-    // =================================
+    document.getElementById(
+      "downtime"
+    ).innerHTML =
+      data.todayDowntime;
 
-    setInterval(
+    document.getElementById(
+      "restarts"
+    ).innerHTML =
+      data.todayRestarts;
 
-      loadData,
+    document.getElementById(
+      "lastBoot"
+    ).innerHTML =
+      data.lastBoot;
 
-      1000
+    document.getElementById(
+      "heap"
+    ).innerHTML =
+      data.heap;
+
+    // ==================================
+    // LOG TABLE
+    // ==================================
+
+    let rows = "";
+
+    data.logs.forEach(log => {
+
+      rows += `
+
+      <tr>
+
+        <td>${log.date}</td>
+
+        <td>${log.time}</td>
+
+        <td>${log.event}</td>
+
+        <td>${log.downtime}</td>
+
+        <td>${log.restarts}</td>
+
+        <td>${log.uptime}</td>
+
+      </tr>
+      `;
+    });
+
+    document.getElementById(
+      "logs"
+    ).innerHTML = rows;
+
+    // ==================================
+    // CHARTS
+    // ==================================
+
+    buildCharts(data);
+
+    // ==================================
+    // REFRESH TIME
+    // ==================================
+
+    document.getElementById(
+      "refreshTime"
+    ).innerHTML =
+
+      "Last Refresh: " +
+
+      new Date()
+      .toLocaleTimeString();
+
+  }
+
+  catch(err) {
+
+    console.log(err);
+  }
+}
+
+
+
+// ======================================
+// BUILD CHARTS
+// ======================================
+
+function buildCharts(data) {
+
+  // ====================================
+  // 7 DAYS
+  // ====================================
+
+  const labels7 =
+    data.last7days.map(
+      x => x.date
     );
 
-  </script>
+  const values7 =
+    data.last7days.map(
+      x => x.uptime
+    );
+
+  if (chart7)
+    chart7.destroy();
+
+  chart7 = new Chart(
+
+    document
+    .getElementById("chart7"),
+
+    {
+
+      type: "line",
+
+      data: {
+
+        labels: labels7,
+
+        datasets: [{
+
+          label:
+          "Uptime %",
+
+          data: values7,
+
+          tension: 0.3
+        }]
+      },
+
+      options: {
+
+        responsive: true,
+
+        scales: {
+
+          y: {
+
+            min: 0,
+
+            max: 100
+          }
+        }
+      }
+    }
+  );
+
+
+
+  // ====================================
+  // 30 DAYS
+  // ====================================
+
+  const labels30 =
+    data.last30days.map(
+      x => x.date
+    );
+
+  const values30 =
+    data.last30days.map(
+      x => x.uptime
+    );
+
+  if (chart30)
+    chart30.destroy();
+
+  chart30 = new Chart(
+
+    document
+    .getElementById("chart30"),
+
+    {
+
+      type: "line",
+
+      data: {
+
+        labels: labels30,
+
+        datasets: [{
+
+          label:
+          "Uptime %",
+
+          data: values30,
+
+          tension: 0.3
+        }]
+      },
+
+      options: {
+
+        responsive: true,
+
+        scales: {
+
+          y: {
+
+            min: 0,
+
+            max: 100
+          }
+        }
+      }
+    }
+  );
+}
+
+
+
+// ======================================
+// AUTO REFRESH
+// ======================================
+
+// precise heartbeat tracking
+
+loadDashboard();
+
+// refresh every second
+setInterval(
+  loadDashboard,
+  1000
+);
+
+</script>
 
 </body>
-
 </html>
