@@ -119,6 +119,28 @@
       color: #aaa;
     }
 
+    #datetimeBox {
+
+    position: fixed;
+
+    top: 20px;
+
+    right: 20px;
+
+    background: #1e1e1e;
+
+    padding: 10px 15px;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+
+    color: white;
+
+    box-shadow:
+    0 0 10px rgba(0,0,0,0.4);
+  }
+
   </style>
 
 </head>
@@ -126,6 +148,8 @@
 <body>
 
 <h1>ESP Router Dashboard</h1>
+
+<div id="datetimeBox"></div>
 
 <div class="small" id="refreshTime">
 Refreshing...
@@ -275,7 +299,7 @@ Refreshing...
 <script>
 
 const API_URL =
-"https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?type=dashboard";
+"https://script.google.com/macros/s/AKfycbwWXwrwkQWWaPDdCNrb-bEDVwOAT36veI4FkOCCoiMMbRtPfr_lusKvqGRv717qN7JqPw/exec?type=dashboard";
 
 let chart7;
 
@@ -554,7 +578,32 @@ setInterval(
   loadDashboard,
   1000
 );
+function updateDateTime() {
 
+  const now = new Date();
+
+  const date =
+    now.toLocaleDateString();
+
+  const time =
+    now.toLocaleTimeString();
+
+  document.getElementById(
+    "datetimeBox"
+  ).innerHTML =
+
+    date + "<br>" + time;
+}
+
+// Update every second
+updateDateTime();
+
+setInterval(
+  updateDateTime,
+  1000
+);
+
+  
 </script>
 
 </body>
