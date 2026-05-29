@@ -417,6 +417,8 @@ Refreshing...
 const API_URL =
 "https://script.google.com/macros/s/AKfycbwWXwrwkQWWaPDdCNrb-bEDVwOAT36veI4FkOCCoiMMbRtPfr_lusKvqGRv717qN7JqPw/exec?type=dashboard";
 
+let chart24;
+  
 let chart7;
 
 let chart30;
@@ -621,6 +623,66 @@ async function loadDashboard() {
 
 function buildCharts(data) {
 
+ function buildCharts(data) {
+
+  // ====================================
+  // LAST 24 HOURS
+  // ====================================
+
+  const labels24 =
+    data.last24hours.map(
+      x => x.time
+    );
+
+  const values24 =
+    data.last24hours.map(
+      x => x.uptime
+    );
+
+  if (chart24)
+    chart24.destroy();
+
+  chart24 = new Chart(
+
+    document
+    .getElementById("chart24"),
+
+    {
+
+      type: "line",
+
+      data: {
+
+        labels: labels24,
+
+        datasets: [{
+
+          label:
+          "Uptime %",
+
+          data: values24,
+
+          tension: 0.3
+        }]
+      },
+
+      options: {
+
+        responsive: true,
+
+        scales: {
+
+          y: {
+
+            min: 0,
+
+            max: 100
+          }
+        }
+      }
+    }
+  );
+
   // ====================================
   // 7 DAYS
   // ====================================
@@ -678,8 +740,6 @@ function buildCharts(data) {
       }
     }
   );
-
-
 
   // ====================================
   // 30 DAYS
@@ -739,7 +799,6 @@ function buildCharts(data) {
     }
   );
 }
-
 
 
 // ======================================
