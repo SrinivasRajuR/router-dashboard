@@ -77,6 +77,21 @@
       color: #ff4444;
     }
 
+    .green {
+
+      color: #00ff88;
+    }
+
+    .yellow {
+
+      color: #ffd500;
+    }
+
+    .red {
+
+      color: #ff4444;
+    }
+
     table {
 
       width: 100%;
@@ -121,25 +136,25 @@
 
     #datetimeBox {
 
-    position: fixed;
+      position: fixed;
 
-    top: 20px;
+      top: 20px;
 
-    right: 20px;
+      right: 20px;
 
-    background: #1e1e1e;
+      background: #1e1e1e;
 
-    padding: 10px 15px;
+      padding: 10px 15px;
 
-    border-radius: 10px;
+      border-radius: 10px;
 
-    font-size: 14px;
+      font-size: 14px;
 
-    color: white;
+      color: white;
 
-    box-shadow:
-    0 0 10px rgba(0,0,0,0.4);
-  }
+      box-shadow:
+      0 0 10px rgba(0,0,0,0.4);
+    }
 
   </style>
 
@@ -157,40 +172,47 @@ Refreshing...
 
 <div class="grid">
 
+  <!-- STATUS -->
+
   <div class="card">
 
-  <div class="title">
-    ESP Status
+    <div class="title">
+      ESP Status
+    </div>
+
+    <div
+      class="value"
+      id="status"
+    >
+      --
+    </div>
+
   </div>
+
+  <!-- LAST ONLINE -->
 
   <div
-    class="value"
-    id="status"
+    class="card"
+    id="lastOnlineCard"
+    style="display:none;"
   >
-    --
+
+    <div class="title">
+      Last Online
+    </div>
+
+    <div
+      class="value"
+      id="lastOnline"
+      style="font-size:16px;"
+    >
+      --
+    </div>
+
   </div>
 
-</div>
+  <!-- TODAY UPTIME -->
 
-<div
-  class="card"
-  id="lastOnlineCard"
-  style="display:none;"
->
-
-  <div class="title">
-    Last Online
-  </div>
-
-  <div
-    class="value"
-    id="lastOnline"
-    style="font-size:18px;"
-  >
-    --
-  </div>
-
-</div>
   <div class="card">
 
     <div class="title">
@@ -205,6 +227,8 @@ Refreshing...
     </div>
 
   </div>
+
+  <!-- TOTAL DOWNTIME -->
 
   <div class="card">
 
@@ -221,6 +245,30 @@ Refreshing...
 
   </div>
 
+  <!-- LIVE OUTAGE -->
+
+  <div
+    class="card"
+    id="liveOutageCard"
+    style="display:none;"
+  >
+
+    <div class="title">
+      Live Outage
+    </div>
+
+    <div
+      class="value offline"
+      id="liveOutage"
+      style="font-size:20px;"
+    >
+      --
+    </div>
+
+  </div>
+
+  <!-- RESTARTS -->
+
   <div class="card">
 
     <div class="title">
@@ -235,6 +283,8 @@ Refreshing...
     </div>
 
   </div>
+
+  <!-- LAST BOOT -->
 
   <div class="card">
 
@@ -251,6 +301,8 @@ Refreshing...
     </div>
 
   </div>
+
+  <!-- HEAP -->
 
   <div class="card">
 
@@ -327,7 +379,7 @@ let chart30;
 
 
 // ======================================
-// FETCH DASHBOARD DATA
+// LOAD DASHBOARD
 // ======================================
 
 async function loadDashboard() {
@@ -341,12 +393,22 @@ async function loadDashboard() {
       await res.json();
 
     // ==================================
-    // HEARTBEAT STATUS
+    // STATUS
     // ==================================
 
     const status =
       document.getElementById(
         "status"
+      );
+
+    const lastOnlineCard =
+      document.getElementById(
+        "lastOnlineCard"
+      );
+
+    const liveOutageCard =
+      document.getElementById(
+        "liveOutageCard"
       );
 
     if (data.online) {
@@ -356,6 +418,12 @@ async function loadDashboard() {
 
       status.className =
         "value online";
+
+      lastOnlineCard.style.display =
+        "none";
+
+      liveOutageCard.style.display =
+        "none";
     }
 
     else {
@@ -365,43 +433,66 @@ async function loadDashboard() {
 
       status.className =
         "value offline";
+
+      lastOnlineCard.style.display =
+        "block";
+
+      liveOutageCard.style.display =
+        "block";
+
+      document.getElementById(
+        "lastOnline"
+      ).innerHTML =
+        data.lastOnline;
+
+      document.getElementById(
+        "liveOutage"
+      ).innerHTML =
+        data.liveOutage;
     }
 
-    const lastOnlineCard =
-  document.getElementById(
-    "lastOnlineCard"
-  );
-
-if (data.online) {
-
-  lastOnlineCard.style.display =
-    "none";
-}
-
-else {
-
-  lastOnlineCard.style.display =
-    "block";
-
-  document.getElementById(
-    "lastOnline"
-  ).innerHTML =
-
-    data.lastOnline;
-}
     // ==================================
-    // CARDS
+    // UPTIME
     // ==================================
 
-    document.getElementById(
-      "uptime"
-    ).innerHTML =
+    const uptimeBox =
+      document.getElementById(
+        "uptime"
+      );
+
+    uptimeBox.innerHTML =
       data.todayUptime + "%";
 
-    document.getElementById(
-      "downtime"
-    ).innerHTML =
+    uptimeBox.className =
+      "value " + data.slaColor;
+
+    // ==================================
+    // DOWNTIME
+    // ==================================
+
+    const downBox =
+      document.getElementById(
+        "downtime"
+      );
+
+    downBox.innerHTML =
       data.todayDowntime;
+
+    if (data.online) {
+
+      downBox.className =
+        "value";
+    }
+
+    else {
+
+      downBox.className =
+        "value red";
+    }
+
+    // ==================================
+    // OTHER CARDS
+    // ==================================
 
     document.getElementById(
       "restarts"
@@ -607,21 +698,13 @@ function buildCharts(data) {
 
 
 // ======================================
-// AUTO REFRESH
+// CLOCK
 // ======================================
 
-// precise heartbeat tracking
-
-loadDashboard();
-
-// refresh every second
-setInterval(
-  loadDashboard,
-  1000
-);
 function updateDateTime() {
 
-  const now = new Date();
+  const now =
+    new Date();
 
   const date =
     now.toLocaleDateString();
@@ -633,11 +716,35 @@ function updateDateTime() {
     "datetimeBox"
   ).innerHTML =
 
-    date + "<br>" + time;
+    date +
+
+    "<br>" +
+
+    time;
 }
 
-// Update every second
+
+
+// ======================================
+// START
+// ======================================
+
+loadDashboard();
+
 updateDateTime();
+
+
+
+// refresh dashboard every second
+
+setInterval(
+  loadDashboard,
+  1000
+);
+
+
+
+// update clock every second
 
 setInterval(
   updateDateTime,
