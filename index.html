@@ -417,13 +417,9 @@ Refreshing...
 const API_URL =
 "https://script.google.com/macros/s/AKfycbwWXwrwkQWWaPDdCNrb-bEDVwOAT36veI4FkOCCoiMMbRtPfr_lusKvqGRv717qN7JqPw/exec?type=dashboard";
 
-let chart24;
-  
-let chart7;
-
-let chart30;
-
-
+let chart24 = null;
+let chart7 = null;
+let chart30 = null;
 
 // ======================================
 // LOAD DASHBOARD
@@ -433,79 +429,49 @@ async function loadDashboard() {
 
   try {
 
-    const res =
-      await fetch(API_URL);
+    const res = await fetch(API_URL);
+    const data = await res.json();
 
-    const data =
-      await res.json();
+    console.log(data);
 
-    // ==================================
     // STATUS
-    // ==================================
 
     const status =
-      document.getElementById(
-        "status"
-      );
+      document.getElementById("status");
 
     const lastOnlineCard =
-      document.getElementById(
-        "lastOnlineCard"
-      );
+      document.getElementById("lastOnlineCard");
 
     const liveOutageCard =
-      document.getElementById(
-        "liveOutageCard"
-      );
+      document.getElementById("liveOutageCard");
 
     if (data.online) {
 
-      status.innerHTML =
-        "ONLINE";
+      status.innerHTML = "ONLINE";
+      status.className = "value online";
 
-      status.className =
-        "value online";
+      lastOnlineCard.style.display = "none";
+      liveOutageCard.style.display = "none";
 
-      lastOnlineCard.style.display =
-        "none";
+    } else {
 
-      liveOutageCard.style.display =
-        "none";
-    }
+      status.innerHTML = "OFFLINE";
+      status.className = "value offline";
 
-    else {
+      lastOnlineCard.style.display = "block";
+      liveOutageCard.style.display = "block";
 
-      status.innerHTML =
-        "OFFLINE";
-
-      status.className =
-        "value offline";
-
-      lastOnlineCard.style.display =
-        "block";
-
-      liveOutageCard.style.display =
-        "block";
-
-      document.getElementById(
-        "lastOnline"
-      ).innerHTML =
+      document.getElementById("lastOnline").innerHTML =
         data.lastOnline;
 
-      document.getElementById(
-        "liveOutage"
-      ).innerHTML =
+      document.getElementById("liveOutage").innerHTML =
         data.liveOutage;
     }
 
-    // ==================================
     // UPTIME
-    // ==================================
 
     const uptimeBox =
-      document.getElementById(
-        "uptime"
-      );
+      document.getElementById("uptime");
 
     uptimeBox.innerHTML =
       data.todayUptime + "%";
@@ -513,109 +479,68 @@ async function loadDashboard() {
     uptimeBox.className =
       "value " + data.slaColor;
 
-    // ==================================
     // DOWNTIME
-    // ==================================
 
     const downBox =
-      document.getElementById(
-        "downtime"
-      );
+      document.getElementById("downtime");
 
     downBox.innerHTML =
       data.todayDowntime;
 
-    if (data.online) {
+    downBox.className =
+      data.online
+      ? "value"
+      : "value red";
 
-      downBox.className =
-        "value";
-    }
+    // OTHER
 
-    else {
-
-      downBox.className =
-        "value red";
-    }
-
-    // ==================================
-    // OTHER CARDS
-    // ==================================
-
-    document.getElementById(
-      "restarts"
-    ).innerHTML =
+    document.getElementById("restarts").innerHTML =
       data.todayRestarts;
 
-    document.getElementById(
-      "lastBoot"
-    ).innerHTML =
+    document.getElementById("lastBoot").innerHTML =
       data.lastBoot;
 
-    document.getElementById(
-      "heap"
-    ).innerHTML =
+    document.getElementById("heap").innerHTML =
       data.heap;
 
-    // ==================================
-    // LOG TABLE
-    // ==================================
+    // LOGS
 
     let rows = "";
 
     data.logs.forEach(log => {
 
       rows += `
-
       <tr>
-
         <td>${log.date}</td>
-
         <td>${log.time}</td>
-
         <td>${log.event}</td>
-
         <td>${log.downtime}</td>
-
         <td>${log.restarts}</td>
-
         <td>${log.uptime}</td>
-
       </tr>
       `;
     });
 
-    document.getElementById(
-      "logs"
-    ).innerHTML = rows;
+    document.getElementById("logs").innerHTML =
+      rows;
 
-    // ==================================
-    // CHARTS
-    // ==================================
+    // BUILD CHARTS
 
     buildCharts(data);
 
-    // ==================================
     // REFRESH TIME
-    // ==================================
 
-    document.getElementById(
-      "refreshTime"
-    ).innerHTML =
-
+    document.getElementById("refreshTime").innerHTML =
       "Last Refresh: " +
-
-      new Date()
-      .toLocaleTimeString();
+      new Date().toLocaleTimeString();
 
   }
 
   catch(err) {
 
-    console.log(err);
+    console.error("Dashboard Error:", err);
   }
 }
-
-
 
 // ======================================
 // BUILD CHARTS
@@ -623,57 +548,36 @@ async function loadDashboard() {
 
 function buildCharts(data) {
 
-  // ====================================
-  // LAST 24 HOURS
-  // ====================================
+  // 24 HOURS
 
   const labels24 =
-    data.last24hours.map(
-      x => x.time
-    );
+    data.last24hours.map(x => x.time);
 
   const values24 =
-    data.last24hours.map(
-      x => x.uptime
-    );
+    data.last24hours.map(x => x.uptime);
 
   if (chart24)
     chart24.destroy();
 
   chart24 = new Chart(
-
-    document
-    .getElementById("chart24"),
-
+    document.getElementById("chart24"),
     {
-
       type: "line",
 
       data: {
-
         labels: labels24,
-
         datasets: [{
-
-          label:
-          "Uptime %",
-
+          label: "Uptime %",
           data: values24,
-
           tension: 0.3
         }]
       },
 
       options: {
-
         responsive: true,
-
         scales: {
-
           y: {
-
             min: 0,
-
             max: 100
           }
         }
@@ -681,57 +585,36 @@ function buildCharts(data) {
     }
   );
 
-  // ====================================
   // 7 DAYS
-  // ====================================
 
   const labels7 =
-    data.last7days.map(
-      x => x.date
-    );
+    data.last7days.map(x => x.date);
 
   const values7 =
-    data.last7days.map(
-      x => x.uptime
-    );
+    data.last7days.map(x => x.uptime);
 
   if (chart7)
     chart7.destroy();
 
   chart7 = new Chart(
-
-    document
-    .getElementById("chart7"),
-
+    document.getElementById("chart7"),
     {
-
       type: "line",
 
       data: {
-
         labels: labels7,
-
         datasets: [{
-
-          label:
-          "Uptime %",
-
+          label: "Uptime %",
           data: values7,
-
           tension: 0.3
         }]
       },
 
       options: {
-
         responsive: true,
-
         scales: {
-
           y: {
-
             min: 0,
-
             max: 100
           }
         }
@@ -739,57 +622,36 @@ function buildCharts(data) {
     }
   );
 
-  // ====================================
   // 30 DAYS
-  // ====================================
 
   const labels30 =
-    data.last30days.map(
-      x => x.date
-    );
+    data.last30days.map(x => x.date);
 
   const values30 =
-    data.last30days.map(
-      x => x.uptime
-    );
+    data.last30days.map(x => x.uptime);
 
   if (chart30)
     chart30.destroy();
 
   chart30 = new Chart(
-
-    document
-    .getElementById("chart30"),
-
+    document.getElementById("chart30"),
     {
-
       type: "line",
 
       data: {
-
         labels: labels30,
-
         datasets: [{
-
-          label:
-          "Uptime %",
-
+          label: "Uptime %",
           data: values30,
-
           tension: 0.3
         }]
       },
 
       options: {
-
         responsive: true,
-
         scales: {
-
           y: {
-
             min: 0,
-
             max: 100
           }
         }
@@ -797,59 +659,35 @@ function buildCharts(data) {
     }
   );
 }
+
 // ======================================
 // CLOCK
 // ======================================
 
 function updateDateTime() {
 
-  const now =
-    new Date();
+  const now = new Date();
 
-  const date =
-    now.toLocaleDateString();
-
-  const time =
-    now.toLocaleTimeString();
-
-  document.getElementById(
-    "datetimeBox"
-  ).innerHTML =
-
-    date +
-
+  document.getElementById("datetimeBox").innerHTML =
+    now.toLocaleDateString() +
     "<br>" +
-
-    time;
+    now.toLocaleTimeString();
 }
-
-
 
 // ======================================
 // START
 // ======================================
 
-loadDashboard();
+window.onload = function () {
 
-updateDateTime();
+  loadDashboard();
 
+  updateDateTime();
 
+  setInterval(loadDashboard, 5000);
 
-// refresh dashboard every second
-
-setInterval(
-  loadDashboard,
-  1000
-);
-
-
-
-// update clock every second
-
-setInterval(
-  updateDateTime,
-  1000
-);
+  setInterval(updateDateTime, 1000);
+};
 
 </script>
 
