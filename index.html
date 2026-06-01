@@ -621,15 +621,15 @@ function buildCharts(data) {
 
         responsive: true,
 
-        scales: {
+        const minVal = Math.min(...values7);
+        const maxVal = Math.max(...values7);
 
-          y: {
-
-            min: 0,
-
-            max: 100
-          }
-        }
+      scales: {
+  y: {
+    min: Math.max(0, minVal - 1),
+    max: Math.min(100, maxVal + 1)
+  }
+}
       }
     }
   );
@@ -681,13 +681,13 @@ function buildCharts(data) {
 
         responsive: true,
 
+        const minVal30 = Math.min(...values30);
+        const maxVal30 = Math.max(...values30);
+
         scales: {
-
           y: {
-
-            min: 0,
-
-            max: 100
+          min: Math.max(0, minVal30 - 1),
+          max: Math.min(100, maxVal30 + 1)
           }
         }
       }
