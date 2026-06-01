@@ -592,6 +592,8 @@ function buildCharts(data) {
 
   if (chart7)
     chart7.destroy();
+    const minVal = Math.min(...values7);
+    const maxVal = Math.max(...values7);
 
   chart7 = new Chart(
 
@@ -621,8 +623,6 @@ function buildCharts(data) {
 
         responsive: true,
 
-        const minVal = Math.min(...values7);
-        const maxVal = Math.max(...values7);
 
       scales: {
   y: {
@@ -652,6 +652,8 @@ function buildCharts(data) {
 
   if (chart30)
     chart30.destroy();
+    const minVal30 = Math.min(...values30);
+    const maxVal30 = Math.max(...values30);
 
   chart30 = new Chart(
 
