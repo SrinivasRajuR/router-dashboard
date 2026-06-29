@@ -318,9 +318,56 @@ Refreshing...
     </div>
 
   </div>
+  <!-- ISP COUNTDOWN -->
+
+<div class="card">
+
+  <div class="title">
+    Remaining
+  </div>
+
+  <div
+    class="value green"
+    id="countdown"
+    style="font-size:22px;">
+    --
+  </div>
 
 </div>
 
+</div>
+
+
+<h2>ISP Connection</h2>
+
+<div class="grid">
+
+<div class="card">
+<div class="title">IP Address</div>
+<div class="value" id="ispIP">--</div>
+</div>
+
+<div class="card">
+<div class="title">Upload</div>
+<div class="value" id="ispUpload">--</div>
+</div>
+
+<div class="card">
+<div class="title">Download</div>
+<div class="value" id="ispDownload">--</div>
+</div>
+
+<div class="card">
+<div class="title">Connected</div>
+<div class="value" id="ispConnected">--</div>
+</div>
+
+<div class="card">
+<div class="title">Remaining</div>
+<div class="value" id="ispLeft">--</div>
+</div>
+
+</div>
 
 
 <h2>Last 7 Days Uptime</h2>
@@ -375,6 +422,8 @@ const API_URL =
 let chart7;
 
 let chart30;
+
+let expiryTime = null;
 
 
 
@@ -508,6 +557,22 @@ async function loadDashboard() {
       "heap"
     ).innerHTML =
       data.heap;
+
+    document.getElementById("ispIP").innerHTML =
+    data.ispIP || "--";
+
+document.getElementById("ispConnected").innerHTML =
+    data.ispConnected || "--";
+
+document.getElementById("ispUpload").innerHTML =
+    data.ispUpload || "--";
+
+document.getElementById("ispDownload").innerHTML =
+    data.ispDownload || "--";
+
+    calculateExpiry(data.ispLeft);
+
+    
 
     // ==================================
     // LOG TABLE
@@ -695,7 +760,68 @@ function buildCharts(data) {
   );
 }
 
+//====================================
+  //calculate expiry
+  //==============================
 
+function calculateExpiry(leftString)
+{
+    if(!leftString) return;
+
+    let total = 0;
+
+    let d = leftString.match(/(\d+)d/);
+    let h = leftString.match(/(\d+)h/);
+    let m = leftString.match(/(\d+)m/);
+    let s = leftString.match(/(\d+)s/);
+
+    if(d) total += Number(d[1])*86400;
+    if(h) total += Number(h[1])*3600;
+    if(m) total += Number(m[1])*60;
+    if(s) total += Number(s[1]);
+
+    expiryTime = new Date(Date.now()+total*1000);
+
+    document.getElementById("expiryDate").innerHTML =
+        expiryTime.toLocaleString();
+}
+
+function updateCountdown()
+{
+    if(!expiryTime) return;
+
+    let diff =
+        Math.floor((expiryTime-new Date())/1000);
+
+    if(diff<0)
+        diff=0;
+
+    let d=Math.floor(diff/86400);
+    diff%=86400;
+
+    let h=Math.floor(diff/3600);
+    diff%=3600;
+
+    let m=Math.floor(diff/60);
+
+    let s=diff%60;
+
+    document.getElementById("countdown").innerHTML =
+        `${d}d ${h}h ${m}m ${s}s`;
+
+    let box =
+        document.getElementById("countdown");
+
+    if(d>7)
+        box.className="value green";
+    else if(d>3)
+        box.className="value yellow";
+    else if(d>0)
+        box.className="value red";
+    else
+        box.className="value offline";
+}
+  
 
 // ======================================
 // CLOCK
@@ -733,6 +859,8 @@ loadDashboard();
 
 updateDateTime();
 
+updateCountdown();
+
 
 
 // refresh dashboard every second
@@ -748,6 +876,11 @@ setInterval(
 
 setInterval(
   updateDateTime,
+  1000
+);
+
+setInterval(
+  updateCountdown,
   1000
 );
 
