@@ -358,6 +358,19 @@ Refreshing...
         --
     </div>
 </div>
+  <div class="card">
+
+<div class="title">
+Remaining Time
+</div>
+
+<div
+class="value green"
+id="countdown">
+--
+</div>
+
+</div>
 </div>
 
 
@@ -560,9 +573,6 @@ document.getElementById("ispUpload").innerHTML =
 
 document.getElementById("ispDownload").innerHTML =
     data.ispDownload || "--";
-    
-document.getElementById("ispLeft").innerHTML =
-    data.ispLeft || "--";
 
     calculateExpiry(data.ispLeft);
 
