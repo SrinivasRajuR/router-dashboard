@@ -20,6 +20,8 @@ let expiryTime = null;
 
 let lastStatus = "";
 
+let dashboard = null;
+
 
 //==========================================================
 // ELEMENTS
@@ -49,23 +51,6 @@ function $(id){
 }
 
 
-//==========================================================
-// SHOW TOAST
-//==========================================================
-
-function showToast(message){
-
-    toast.innerHTML = message;
-
-    toast.classList.add("show");
-
-    setTimeout(()=>{
-
-        toast.classList.remove("show");
-
-    },2500);
-
-}
 
 
 //==========================================================
@@ -77,36 +62,6 @@ function showLoader(){
     loader.style.display="flex";
 
     app.classList.remove("show");
-
-}
-
-
-//==========================================================
-// HIDE LOADER
-//==========================================================
-
-function hideLoader(){
-
-    loader.style.display="none";
-
-    app.classList.add("show");
-
-}
-
-
-//==========================================================
-// CLOCK
-//==========================================================
-
-function updateClock(){
-
-    const now = new Date();
-
-    $("currentDate").innerHTML =
-    now.toLocaleDateString();
-
-    $("currentTime").innerHTML =
-    now.toLocaleTimeString();
 
 }
 
@@ -282,69 +237,8 @@ function updateProgress(data){
 }
 
 
-//==========================================================
-// API CALL
-//==========================================================
-
-async function loadDashboard(){
-
-    try{
-
-        const response =
-        await fetch(API_URL);
-
-        if(!response.ok){
-
-            throw new Error(
-            "HTTP Error " +
-            response.status
-            );
-
-        }
-
-        const data =
-        await response.json();
-
-        updateStatus(data);
-
-        updateCards(data);
-
-        updateProgress(data);
-
-        hideLoader();
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-        $("status").innerHTML="ERROR";
-
-        $("status").className=
-        "card-value red";
-
-        $("statusText").innerHTML=
-        "Unable to load dashboard";
-
-    }
-
-}
 
 
-//==========================================================
-// STARTUP
-//==========================================================
-
-showLoader();
-
-updateClock();
-
-loadDashboard();
-
-setInterval(updateClock,1000);
-
-setInterval(loadDashboard,REFRESH_INTERVAL);
 /* ==========================================================
    SCRIPT.JS
    PART 2
@@ -356,7 +250,7 @@ async function loadDashboard(){
 try{
 
 const response=
-await fetch(API_URL,{
+await fetch(API_URL + "&t=" + Date.now(),{
 cache:"no-store"
 });
 
@@ -476,7 +370,7 @@ let uptime=
 parseFloat(data.todayUptime);
 
 let health="Excellent";
-let cls="good";
+let cls="green";
 
 if(uptime<99.9){
 
@@ -488,14 +382,14 @@ cls="green";
 if(uptime<99){
 
 health="Average";
-cls="warning";
+cls="yellow";
 
 }
 
 if(uptime<95){
 
 health="Poor";
-cls="bad";
+cls="red";
 
 }
 
@@ -544,7 +438,15 @@ hideLoader();
 }
 catch(e){
 
-console.error(e);
+    console.error(e);
+
+    $("status").innerHTML = "ERROR";
+    $("status").className = "card-value red";
+
+    $("statusText").innerHTML =
+    "Unable to connect";
+
+    showToast("Cannot reach server");
 
 }
 }
@@ -609,117 +511,127 @@ build30DayChart(data.last30days);
 
 function build7DayChart(days){
 
-const labels=
-days.map(x=>x.date);
+    const labels = days.map(x => x.date);
 
-const values=
-days.map(x=>Number(x.uptime));
+    const values = days.map(x => Number(x.uptime));
 
-if(chart7){
+    if(!chart7){
 
-chart7.destroy();
+        chart7 = new Chart(
+
+            document.getElementById("chart7"),
+
+            {
+
+                type:"line",
+
+                data:{
+
+                    labels:labels,
+
+                    datasets:[{
+
+                        label:"Uptime %",
+
+                        data:values,
+
+                        borderColor:"#3b82f6",
+
+                        backgroundColor:"rgba(59,130,246,.15)",
+
+                        fill:true,
+
+                        borderWidth:3,
+
+                        pointRadius:4,
+
+                        pointHoverRadius:6,
+
+                        tension:.35
+
+                    }]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    animation:true,
+
+                    plugins:{
+
+                        legend:{
+
+                            display:false
+
+                        }
+
+                    },
+
+                    scales:{
+
+                        y:{
+
+                            min:0,
+
+                            max:100,
+
+                            ticks:{
+
+                                color:"#ffffff"
+
+                            },
+
+                            grid:{
+
+                                color:"rgba(255,255,255,.08)"
+
+                            }
+
+                        },
+
+                        x:{
+
+                            ticks:{
+
+                                color:"#ffffff"
+
+                            },
+
+                            grid:{
+
+                                display:false
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+    }
+
+    else{
+
+        chart7.data.labels = labels;
+
+        chart7.data.datasets[0].data = values;
+
+        chart7.update();
+
+    }
 
 }
 
-chart7=new Chart(
 
-document.getElementById("chart7"),
-
-{
-
-type:"line",
-
-data:{
-
-labels:labels,
-
-datasets:[{
-
-label:"Uptime %",
-
-data:values,
-
-borderColor:"#3b82f6",
-
-backgroundColor:"rgba(59,130,246,.15)",
-
-fill:true,
-
-borderWidth:3,
-
-pointRadius:4,
-
-pointHoverRadius:6,
-
-tension:.35
-
-}]
-
-},
-
-options:{
-
-responsive:true,
-
-maintainAspectRatio:false,
-
-plugins:{
-
-legend:{
-
-display:false
-
-}
-
-},
-
-scales:{
-
-y:{
-
-min:0,
-
-max:100,
-
-ticks:{
-
-color:"#ffffff"
-
-},
-
-grid:{
-
-color:"rgba(255,255,255,.08)"
-
-}
-
-},
-
-x:{
-
-ticks:{
-
-color:"#ffffff"
-
-},
-
-grid:{
-
-display:false
-
-}
-
-}
-
-}
-
-}
-
-}
-
-);
-
-}
 
 /* ===========================
    30 DAY CHART
@@ -727,119 +639,127 @@ display:false
 
 function build30DayChart(days){
 
-const labels=
-days.map(x=>x.date);
+    const labels = days.map(x => x.date);
 
-const values=
-days.map(x=>Number(x.uptime));
+    const values = days.map(x => Number(x.uptime));
 
-if(chart30){
+    if(!chart30){
 
-chart30.destroy();
+        chart30 = new Chart(
 
-}
+            document.getElementById("chart30"),
 
-chart30=new Chart(
+            {
 
-document.getElementById("chart30"),
+                type:"line",
 
-{
+                data:{
 
-type:"line",
+                    labels:labels,
 
-data:{
+                    datasets:[{
 
-labels:labels,
+                        label:"Uptime %",
 
-datasets:[{
+                        data:values,
 
-label:"Uptime %",
+                        borderColor:"#18d26e",
 
-data:values,
+                        backgroundColor:"rgba(24,210,110,.15)",
 
-borderColor:"#18d26e",
+                        fill:true,
 
-backgroundColor:"rgba(24,210,110,.15)",
+                        borderWidth:3,
 
-fill:true,
+                        pointRadius:2,
 
-borderWidth:3,
+                        pointHoverRadius:5,
 
-pointRadius:2,
+                        tension:.35
 
-pointHoverRadius:5,
+                    }]
 
-tension:.35
+                },
 
-}]
+                options:{
 
-},
+                    responsive:true,
 
-options:{
+                    maintainAspectRatio:false,
 
-responsive:true,
+                    animation:true,
 
-maintainAspectRatio:false,
+                    plugins:{
 
-plugins:{
+                        legend:{
 
-legend:{
+                            display:false
 
-display:false
+                        }
 
-}
+                    },
 
-},
+                    scales:{
 
-scales:{
+                        y:{
 
-y:{
+                            min:0,
 
-min:0,
+                            max:100,
 
-max:100,
+                            ticks:{
 
-ticks:{
+                                color:"#ffffff"
 
-color:"#ffffff"
+                            },
 
-},
+                            grid:{
 
-grid:{
+                                color:"rgba(255,255,255,.08)"
 
-color:"rgba(255,255,255,.08)"
+                            }
 
-}
+                        },
 
-},
+                        x:{
 
-x:{
+                            ticks:{
 
-ticks:{
+                                color:"#ffffff",
 
-color:"#ffffff",
+                                maxRotation:90,
 
-maxRotation:90,
+                                minRotation:90
 
-minRotation:90
+                            },
 
-},
+                            grid:{
 
-grid:{
+                                display:false
 
-display:false
+                            }
 
-}
+                        }
 
-}
+                    }
 
-}
+                }
 
-}
+            }
 
-}
+        );
 
-);
+    }
+
+    else{
+
+        chart30.data.labels = labels;
+
+        chart30.data.datasets[0].data = values;
+
+        chart30.update();
+
+    }
 
 }
 /* ==========================================================
@@ -932,13 +852,13 @@ box.innerHTML=text;
 
 box.className="card-value";
 
-if(days>=10){
+if(days>7){
 
 box.classList.add("green");
 
 }
 
-else if(days>=5){
+else if(days>3){
 
 box.classList.add("yellow");
 
@@ -1036,27 +956,18 @@ now.toLocaleTimeString();
    INITIALIZATION
 =========================== */
 
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
+document.addEventListener("DOMContentLoaded",()=>{
+
+showLoader();
 
 updateClock();
 
 loadDashboard();
 
-setInterval(
-updateClock,
-1000
-);
+setInterval(updateClock,1000);
 
-setInterval(
-updateCountdown,
-1000
-);
+setInterval(updateCountdown,1000);
 
-setInterval(
-loadDashboard,
-REFRESH_INTERVAL
-);
+setInterval(loadDashboard,REFRESH_INTERVAL);
 
 });
