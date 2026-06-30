@@ -346,6 +346,17 @@ data.ispConnected;
 
 document.getElementById("ispLeft").innerHTML=
 data.ispLeft;
+   
+/* ===========================
+   TODAY'S USAGE
+=========================== */
+
+document.getElementById("todayDownload").innerHTML =
+data.todayDownload || "--";
+
+document.getElementById("todayUpload").innerHTML =
+data.todayUpload || "--";
+
 
 /* ===========================
    LIVE STATUS
