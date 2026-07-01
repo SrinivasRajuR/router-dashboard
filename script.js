@@ -65,6 +65,50 @@ function showLoader(){
 
 }
 
+function startLoadingAnimation(){
+
+const text=document.getElementById("loadingText");
+const progress=document.getElementById("loadingProgress");
+const percent=document.getElementById("loadingPercent");
+
+const steps=[
+
+"Starting Dashboard...",
+"Checking Internet...",
+"Reading Router...",
+"Loading Statistics...",
+"Building Charts...",
+"Almost Ready..."
+
+];
+
+let p=0;
+
+const timer=setInterval(()=>{
+
+p+=20;
+
+progress.style.width=p+"%";
+
+percent.innerHTML=p+"%";
+
+if(p<=100){
+
+text.innerHTML=
+steps[Math.min(p/20-1,steps.length-1)];
+
+}
+
+if(p>=100){
+
+clearInterval(timer);
+
+}
+
+},250);
+
+}
+
 
 //==========================================================
 // FORMAT NUMBER
@@ -909,7 +953,9 @@ document
    LOADER
 =========================== */
 
-function hideLoader(){
+ffunction hideLoader(){
+
+loader.style.opacity="0";
 
 setTimeout(()=>{
 
@@ -917,7 +963,7 @@ loader.style.display="none";
 
 app.classList.add("show");
 
-},500);
+},600);
 
 }
 
@@ -970,6 +1016,8 @@ now.toLocaleTimeString();
 document.addEventListener("DOMContentLoaded",()=>{
 
 showLoader();
+
+startLoadingAnimation();
 
 updateClock();
 
