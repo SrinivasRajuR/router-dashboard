@@ -953,7 +953,7 @@ document
    LOADER
 =========================== */
 
-ffunction hideLoader(){
+function hideLoader(){
 
 loader.style.opacity="0";
 
